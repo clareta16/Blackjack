@@ -1,10 +1,12 @@
 package services;
 
+import cat.itacademy.s05.t01.n01.blackjack.exception.GameNotFoundException;
 import cat.itacademy.s05.t01.n01.blackjack.exception.PlayerNotFoundException;
 import model.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import repository.GameRepository;
 import repository.PlayerRepository;
 import reactor.core.publisher.Flux;
 
@@ -13,6 +15,9 @@ public class PlayerService {
 
     @Autowired
     private PlayerRepository playerRepository;
+
+    @Autowired
+    private GameRepository gameRepository;
 
     public Mono<Player> createPlayer(String username) {
         Player player = new Player(username);
@@ -36,6 +41,27 @@ public class PlayerService {
 
     public Flux<Player> getAllPlayers() {
         return playerRepository.findAll();
+    }
+
+
+    public Mono<Player> placeBet(String id, String playerId, int amount) {
+        return gameRepository.findById(id)
+                .switchIfEmpty(Mono.error(new GameNotFoundException("Game not found")))
+                .flatMap(game -> {
+                    Player player = null;
+                    try {
+                        player = game.getPlayers().stream()
+                                .filter(p -> p.getId().equals(playerId))
+                                .findFirst()
+                                .orElseThrow(() -> new GameNotFoundException("Player not found with id: " + playerId));
+                    } catch (GameNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                    player.setBet(amount);
+
+                    return gameRepository.save(game)
+                            .thenReturn(player);
+                });
     }
 }
 

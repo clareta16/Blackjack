@@ -13,9 +13,9 @@ public class Player {
     private String id;
     private String username;
     private int bet;
+    private boolean isPlaying;
     private List<Card> cards = new ArrayList<>();
 
-    // Constructors
     public Player(String username) {
         this.username = username;
     }
@@ -27,7 +27,6 @@ public class Player {
         this.bet = bet;
     }
 
-    // Getters i setters
     public String getId() {
         return id;
     }
@@ -56,6 +55,18 @@ public class Player {
         return cards;
     }
 
+    public void setCards(List<Card> cards) {
+        this.cards = cards;
+    }
+
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public void setPlaying(boolean isPlaying) {
+        this.isPlaying = isPlaying;
+    }
+
     public int getCardsValue() {
         int cardsValue = 0;
 
@@ -71,6 +82,14 @@ public class Player {
 
         }
         return cardsValue;
+    }
+
+    public void addCard(Card card) {
+        if (card != null) {
+            cards.add(card);
+        } else {
+            throw new IllegalArgumentException("Card cannot be null");
+        }
     }
 }
 

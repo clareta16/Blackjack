@@ -31,6 +31,13 @@ public class GameController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @PostMapping("/games/{id}/start")
+    public Mono<ResponseEntity<Game>> startGame(@PathVariable String id) {
+        return gameService.startGame(id)
+                .map(game -> ResponseEntity.ok(game))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/game/{id}")
     public Mono<ResponseEntity<Game>> getGameDetails(@PathVariable String id) {
         return gameService.getGameDetails(id)
@@ -38,10 +45,24 @@ public class GameController {
     }
 
     @PostMapping("/game/{id}/play")
-    public Mono<ResponseEntity<String>> playGame(@PathVariable String id, @RequestBody String action, int bet) {
-        return gameService.playGame(id, action, bet)
-                .map(result -> ResponseEntity.ok(result))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<ResponseEntity<Player>> playerWantsCard(@PathVariable String playerId, @RequestParam String gameId) {
+        return gameService.playerWantsCard(gameId, playerId)
+                .map(player -> ResponseEntity.ok(player))
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
+    }
+
+    @PostMapping("/{gameId}/player/stops-drawing")
+    public Mono<ResponseEntity<Object>> playerStopsDrawing(@PathVariable String gameId) {
+        return gameService.playerStopsDrawing(gameId)
+                .then(Mono.just(ResponseEntity.ok().build()))
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
+    }
+
+    @PostMapping("/{gameId}/dealer/turn")
+    public Mono<ResponseEntity<Object>> dealerTurn(@PathVariable String gameId) {
+        return gameService.dealerTurn(gameId)
+                .then(Mono.just(ResponseEntity.ok().build()))
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
     @DeleteMapping("/game/{id}/delete")
@@ -58,4 +79,12 @@ public class GameController {
         return gameService.getRanking()
                 .map(ranking -> ResponseEntity.ok(ranking));
     }
+
+    @GetMapping("/{gameId}/winners")
+    public Mono<ResponseEntity<List<Player>>> determineWinners(@PathVariable String gameId) {
+        return gameService.determineWinners(gameId)
+                .map(winners -> ResponseEntity.ok(winners))
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
+    }
 }
+

@@ -39,4 +39,15 @@ public class PlayerController {
         return playerService.getAllPlayers()
                 .map(player -> ResponseEntity.ok(player));
     }
+
+    @PostMapping("/{playerId}/bet")
+    public Mono<ResponseEntity<Player>> placeBet(
+            @PathVariable String playerId,
+            @RequestParam String gameId,
+            @RequestParam int amount) {
+
+        return playerService.placeBet(gameId, playerId, amount)
+                .map(player -> ResponseEntity.ok(player)) // Return success response
+                .onErrorReturn(ResponseEntity.badRequest().build()); // Handle error response
+    }
 }
