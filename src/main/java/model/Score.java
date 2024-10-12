@@ -22,9 +22,9 @@ public class Score {
         this.moneyWon = moneyWon;
     }
 
-    public Score(String username, String userId) {
+    public Score(String id, String username) {
         this.username = username;
-        this.userId = userId;
+        this.id = id;
     }
 
     public int getWins() {

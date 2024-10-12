@@ -17,11 +17,13 @@ public class ScoreController {
     private ScoreService scoreService;
 
     @PostMapping("/new")
-    public Mono<ResponseEntity<Score>> createScore(@RequestBody Score score) {
+    public Mono<ResponseEntity<Score>> createScore(@RequestBody Score score) { //crear o actualitzar info amb un objecte
         return scoreService.saveScore(score)
                 .map(savedScore -> ResponseEntity.status(HttpStatus.CREATED).body(savedScore))
                 .defaultIfEmpty(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
+
+    //map: agafa la info emesa pel mono/flux, la transforma i emet un nou Mono/flux amb la nova info
 
     @GetMapping
     public Flux<Score> getAllScores() {
@@ -29,7 +31,7 @@ public class ScoreController {
     }
 
     @GetMapping("/user/{userId}")
-    public Mono<Score> getScoresByUserId(@PathVariable String userId) {
+    public Mono<Score> getScoresByUserId(@PathVariable String userId) { // agafar info específica de url
         return scoreService.getScoresByUserId(userId);
     }
 }

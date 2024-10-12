@@ -10,6 +10,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import services.GameService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/game")
 public class GameController {
@@ -17,9 +19,14 @@ public class GameController {
     @Autowired
     private GameService gameService;
 
+    @Autowired
+    public GameController(GameService gameService) {
+        this.gameService = gameService;
+    }
+
     @PostMapping("/game/new")
-    public Mono<ResponseEntity<Game>> createGame(@RequestBody String playerUsername) {
-        return gameService.createGame(playerUsername)
+    public Mono<ResponseEntity<Game>> createGame(@RequestBody List<Player> playerUsernames) {
+        return gameService.createGame(playerUsernames)
                 .map(game -> ResponseEntity.status(201).body(game))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
@@ -43,6 +50,8 @@ public class GameController {
                 .map(aVoid -> ResponseEntity.noContent().build())
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    //a l'utilitzar notFound o noContent s'ha de posar build per acabar de crear la response entity
 
     @GetMapping("/ranking")
     public Flux<ResponseEntity<String>> getRanking() {

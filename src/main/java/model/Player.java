@@ -13,11 +13,10 @@ public class Player {
     private String id;
     private String username;
     private int bet;
-    private List<Card> cards = new ArrayList<>(); // Inicialització per evitar NPE
+    private List<Card> cards = new ArrayList<>();
 
     // Constructors
-    public Player(String id, String username) {
-        this.id = id;
+    public Player(String username) {
         this.username = username;
     }
 

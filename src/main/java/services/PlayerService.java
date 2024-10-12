@@ -12,10 +12,10 @@ import reactor.core.publisher.Flux;
 public class PlayerService {
 
     @Autowired
-    private static PlayerRepository playerRepository;
+    private PlayerRepository playerRepository;
 
-    public Mono<Player> createPlayer(String id, String username) {
-        Player player = new Player(id, username);
+    public Mono<Player> createPlayer(String username) {
+        Player player = new Player(username);
         return playerRepository.save(player);
     }
 
@@ -24,16 +24,19 @@ public class PlayerService {
                 .switchIfEmpty(Mono.error(new PlayerNotFoundException("Player with ID " + id + " not found")));
     }
 
-
-    public static Mono<Player> changePlayerUsername(String playerId, String newUsername) {
+    public Mono<Player> changePlayerUsername(String playerId, String newUsername) {
         return playerRepository.findById(playerId)
                 .flatMap(player -> {
                     player.setUsername(newUsername);
                     return playerRepository.save(player);
-                });
+                })
+                .switchIfEmpty(Mono.error(new PlayerNotFoundException("Player with ID " + playerId + " not found")));
+        // si el flatmap busca el jugador i no existeix, llença l'excepció
     }
 
     public Flux<Player> getAllPlayers() {
         return playerRepository.findAll();
     }
 }
+
+

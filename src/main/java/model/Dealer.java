@@ -3,7 +3,7 @@ package model;
 import java.util.List;
 import java.util.Scanner;
 
-public abstract class Dealer {
+public class Dealer {
     private List<Card> cards;
 
     public Dealer(List<Card> cards) {
@@ -30,7 +30,5 @@ public abstract class Dealer {
         }
         return cardsValue;
     }
-
-
-    }
+}
 

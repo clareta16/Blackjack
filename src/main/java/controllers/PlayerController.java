@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 import services.PlayerService;
 import org.springframework.http.ResponseEntity;
 
-@RestController
+@RestController //Controller + Response body
 @RequestMapping("/player")
 public class PlayerController {
 
@@ -16,7 +16,7 @@ public class PlayerController {
 
     @PostMapping("/new")
     public Mono<ResponseEntity<Player>> createPlayer(@RequestParam String id, String username) {
-        return playerService.createPlayer(id, username)
+        return playerService.createPlayer(username)
                 .map(player -> ResponseEntity.status(201).body(player))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
@@ -29,7 +29,7 @@ public class PlayerController {
 
     @PutMapping("/player/{playerId}")
     public Mono<ResponseEntity<Player>> changePlayerUsername(@PathVariable String playerId, @RequestBody String newUsername) {
-        return PlayerService.changePlayerUsername(playerId, newUsername)
+        return playerService.changePlayerUsername(playerId, newUsername)
                 .map(player -> ResponseEntity.ok(player))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

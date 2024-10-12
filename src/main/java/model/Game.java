@@ -3,13 +3,14 @@ package model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "games")
 public class Game {
     @Id
     private String id;
-    private String playerUsername;
+    private List<Player> players = new ArrayList<>();;
     private Deck deck;
     private Score score;
     private List<Card> playerCards;
@@ -23,12 +24,12 @@ public class Game {
         this.id = id;
     }
 
-    public String getPlayerUsername() {
-        return playerUsername;
+    public List<Player> getPlayers() {
+        return players;
     }
 
-    public void setPlayerUsername(String playerUsername) {
-        this.playerUsername = playerUsername;
+    public void setPlayers(List<Player> players) {
+        this.players = players;
     }
 
     public Deck getDeck() {
@@ -61,5 +62,9 @@ public class Game {
 
     public void setDealerCards(List<Card> dealerCards) {
         this.dealerCards = dealerCards;
+    }
+
+    public void addPlayer(Player player) {
+        players.add(player);
     }
 }

@@ -17,8 +17,8 @@ public class ScoreService {
         return scoreRepository.save(score);
     }
 
-    public Mono<Score> getScoresByUserId(String userId) {
-        return scoreRepository.findByUserId(userId);
+    public Mono<Score> getScoresByUserId(String id) {
+        return scoreRepository.findByUserId(id);
     }
 
     public Flux<Score> getAllScores() {

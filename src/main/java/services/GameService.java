@@ -1,25 +1,27 @@
 package services;
 
 import cat.itacademy.s05.t01.n01.blackjack.exception.GameNotFoundException;
-import cat.itacademy.s05.t01.n01.blackjack.exception.PlayerNotFoundException;
 import model.Game;
 import model.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import repository.GameInterface;
+import repository.GameRepository;
+
+import java.util.List;
 
 
 @Service
 public class GameService {
 
     @Autowired
-    private GameInterface.GameRepository gameRepository;
+    private GameRepository gameRepository;
 
-    public Mono<Game> createGame(String playerUsername) {
+    public Mono<Game> createGame(List<Player> players) {
         Game game = new Game();
-        game.setPlayerUsername(playerUsername);
+
+        players.forEach(player -> game.addPlayer(player));
         return gameRepository.save(game);
     }
 
@@ -41,7 +43,4 @@ public class GameService {
         return Flux.just("Ranking");
     }
 
-    public Mono<Player> changePlayerName(String playerId, String newUsername) {
-        return Mono.just(new Player(playerId, newUsername));
-    }
 }
