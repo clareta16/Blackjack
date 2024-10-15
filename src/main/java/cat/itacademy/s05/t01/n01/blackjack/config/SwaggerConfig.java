@@ -24,7 +24,8 @@ public class SwaggerConfig {
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("blackjack")
-                .pathsToMatch("/game/**", "/player/**", "/ranking/**")
+                .pathsToMatch("/game/**", "/player/**", "/score/**")
                 .build();
     }
 }
+

@@ -23,10 +23,10 @@ import java.util.List;
 @Tag(name = "Game Management System", description = "Operations pertaining to Blackjack games")
 public class GameController {
 
-    @Autowired
+   // @Autowired
     private GameService gameService;
 
-    @Autowired
+   // @Autowired
     public GameController(GameService gameService) {
         this.gameService = gameService;
     }
