@@ -1,7 +1,8 @@
 package controllers;
 
-import model.Game;
-import model.Player;
+import cat.itacademy.s05.t01.n01.blackjack.controllers.GameController;
+import cat.itacademy.s05.t01.n01.blackjack.model.Game;
+import cat.itacademy.s05.t01.n01.blackjack.model.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -9,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import services.GameService;
+import cat.itacademy.s05.t01.n01.blackjack.services.GameService;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 

@@ -1,6 +1,7 @@
 package services;
 
-import model.Player;
+import cat.itacademy.s05.t01.n01.blackjack.model.Player;
+import cat.itacademy.s05.t01.n01.blackjack.services.PlayerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.mockito.Mockito.any;
-import repository.PlayerRepository;
+import cat.itacademy.s05.t01.n01.blackjack.repository.PlayerRepository;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
