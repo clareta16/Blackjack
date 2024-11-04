@@ -17,7 +17,6 @@ public class Dealer {
     }
 
     public void playTurn(Deck deck) {
-        cards.clear();
         while (getCardsValue() < STAND_THRESHOLD) {
             drawCard(deck);
         }

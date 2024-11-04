@@ -61,14 +61,14 @@ public class GameService {
                         }
                     } else if ("stand".equalsIgnoreCase(moveType)) {
                         game.playerStopsDrawing();
-                        game.getDealer().playTurn(game.getDeck());
 
                         int playerScore = game.getPlayerCardsValue();
                         int dealerScore = game.getDealer().getCardsValue();
 
                         if (dealerScore > 21 || playerScore > dealerScore) {
                             game.setResult("Player wins!");
-                        } else if (playerScore < dealerScore) {
+                            game.getPlayer().setWins(game.getPlayer().getWins() + 1);
+                        } else if (playerScore < dealerScore || playerScore > 21) {
                             game.setResult("Dealer wins!");
                         } else {
                             game.setResult("It's a tie!");
@@ -76,9 +76,13 @@ public class GameService {
                     } else {
                         return Mono.error(new IllegalArgumentException("Invalid move type: " + moveType));
                     }
-                    return gameRepository.save(game);
+
+                    return playerRepository.save(game.getPlayer())
+                            .then(gameRepository.save(game)); // Save game state with updated dealer cards
                 });
     }
+
+
 
     public Flux<Ranking> getAllPlayerRankings() {
         return playerRepository.findAll()

@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Schema(description = "Game entity representing each game")
 @Document(collection = "game")
@@ -53,8 +54,17 @@ public class Game {
     public Dealer getDealer() {
         return dealer;
     }
+
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public String getResult() {
+        return result;
     }
 
     public void startGame() {
@@ -68,9 +78,11 @@ public class Game {
 
         playerCards.add(deck.draw());
         playerCards.add(deck.draw());
+        dealerCards.clear();
         dealerCards.add(deck.draw());
         dealerCards.add(deck.draw());
     }
+
 
     public void dealCardToPlayer() {
         if (deck.isEmpty()) {
@@ -84,8 +96,9 @@ public class Game {
     public void playerStopsDrawing() {
         player.setPlaying(false);
         dealer.playTurn(deck);
-        dealerCards = dealer.getCards();
+        dealerCards = new ArrayList<>(dealer.getCards());
     }
+
 
     public int getPlayerCardsValue() {
         int totalValue = 0;
@@ -101,6 +114,18 @@ public class Game {
             acesCount--;
         }
         return totalValue;
+    }
+
+    public String getPlayerCardsAsString() {
+        return playerCards.stream()
+                .map(Card::toString)
+                .collect(Collectors.joining(", "));
+    }
+
+    public String getDealerCardsAsString() {
+        return dealerCards.stream()
+                .map(Card::toString)
+                .collect(Collectors.joining(", "));
     }
 }
 
