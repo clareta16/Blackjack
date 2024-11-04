@@ -17,7 +17,6 @@ public class Game {
     private Deck deck;
     private Dealer dealer;
     private List<Card> playerCards;
-    private List<Card> dealerCards;
     private boolean isActive;
     private String result;
 
@@ -27,7 +26,6 @@ public class Game {
         this.deck = new Deck();
         this.dealer = new Dealer();
         this.playerCards = new ArrayList<>();
-        this.dealerCards = new ArrayList<>();
         this.isActive = true;
 
         startGame();
@@ -78,9 +76,8 @@ public class Game {
 
         playerCards.add(deck.draw());
         playerCards.add(deck.draw());
-        dealerCards.clear();
-        dealerCards.add(deck.draw());
-        dealerCards.add(deck.draw());
+        dealer.playTurn(deck);
+
     }
 
 
@@ -96,9 +93,8 @@ public class Game {
     public void playerStopsDrawing() {
         player.setPlaying(false);
         dealer.playTurn(deck);
-        dealerCards = new ArrayList<>(dealer.getCards());
+        dealer.playTurn(deck);
     }
-
 
     public int getPlayerCardsValue() {
         int totalValue = 0;
@@ -116,6 +112,10 @@ public class Game {
         return totalValue;
     }
 
+    public int getDealerCardsValue() {
+        return dealer.getCardsValue();
+    }
+
     public String getPlayerCardsAsString() {
         return playerCards.stream()
                 .map(Card::toString)
@@ -123,7 +123,7 @@ public class Game {
     }
 
     public String getDealerCardsAsString() {
-        return dealerCards.stream()
+        return dealer.getCards().stream()
                 .map(Card::toString)
                 .collect(Collectors.joining(", "));
     }

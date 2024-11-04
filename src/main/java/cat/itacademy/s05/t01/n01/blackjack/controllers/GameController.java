@@ -30,21 +30,21 @@ public class GameController {
     @Autowired
     private GameService gameService;
 
-    @PostMapping("/new")
+    @PostMapping("/new/{playerId}")  // Corrected typo in the path variable
     @Operation(summary = "Create a new game", description = "Create a new Blackjack game.")
     @ApiResponse(responseCode = "201", description = "Game created successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid player name")
-    public Mono<ResponseEntity<Map<String, Object>>> createGame(@RequestBody String playerId) {
+    @ApiResponse(responseCode = "400", description = "Invalid player ID")
+    public Mono<ResponseEntity<Map<String, Object>>> createGame(@PathVariable String playerId) {
         if (playerId == null || playerId.isEmpty()) {
-            return Mono.just(ResponseEntity.badRequest().build());
+            return Mono.just(ResponseEntity.badRequest().body(Map.of("error", "Player ID can't be null or empty")));
         }
         return gameService.createGame(playerId)
                 .map(game -> {
                     Map<String, Object> response = new HashMap<>();
                     response.put("gameId", game.getId());
                     response.put("player", game.getPlayer());
-                    response.put("playerCards", game.getPlayerCardsAsString()); // Mostra les cartes inicials del jugador
-                    response.put("dealerCards", game.getDealerCardsAsString()); // Mostra les cartes inicials del dealer
+                    response.put("playerCards", game.getPlayerCardsAsString()); // Show initial player cards
+                    response.put("dealerCards", game.getDealerCardsAsString()); // Show initial dealer cards
                     response.put("playerCardsValue", game.getPlayerCardsValue());
                     response.put("dealerCardsValue", game.getDealer().getCardsValue());
                     response.put("isActive", game.isActive());
@@ -52,7 +52,6 @@ public class GameController {
                 })
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
 
     @GetMapping("/{id}")
     @Operation(summary = "Get game details", description = "Retrieve details of a specific game by ID.")
@@ -64,8 +63,8 @@ public class GameController {
                     Map<String, Object> response = new HashMap<>();
                     response.put("gameId", game.getId());
                     response.put("player", game.getPlayer());
-                    response.put("playerCards", game.getPlayerCardsAsString()); // Mostra les cartes del jugador
-                    response.put("dealerCards", game.getDealerCardsAsString()); // Mostra les cartes del dealer
+                    response.put("playerCards", game.getPlayerCardsAsString()); // Show player cards
+                    response.put("dealerCards", game.getDealerCardsAsString()); // Show dealer cards
                     response.put("playerCardsValue", game.getPlayerCardsValue());
                     response.put("dealerCardsValue", game.getDealer().getCardsValue());
                     response.put("result", game.getResult());
@@ -74,7 +73,6 @@ public class GameController {
                 })
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
 
     @PostMapping("/{id}/play")
     @Operation(summary = "Play a game move", description = "Play a move in an existing Blackjack game.")
@@ -87,8 +85,8 @@ public class GameController {
                     Map<String, Object> response = new HashMap<>();
                     response.put("gameId", game.getId());
                     response.put("player", game.getPlayer());
-                    response.put("playerCards", game.getPlayerCardsAsString()); // Mostra les cartes actuals del jugador
-                    response.put("dealerCards", game.getDealerCardsAsString()); // Mostra les cartes actuals del dealer
+                    response.put("playerCards", game.getPlayerCardsAsString()); // Show current player cards
+                    response.put("dealerCards", game.getDealerCardsAsString()); // Show current dealer cards
                     response.put("playerCardsValue", game.getPlayerCardsValue());
                     response.put("dealerCardsValue", game.getDealer().getCardsValue());
                     response.put("result", game.getResult());
@@ -96,9 +94,9 @@ public class GameController {
                     return ResponseEntity.ok(response);
                 })
                 .defaultIfEmpty(ResponseEntity.notFound().build())
-                .onErrorResume(IllegalArgumentException.class, e -> Mono.just(ResponseEntity.badRequest().body(null)));
+                .onErrorResume(IllegalArgumentException.class, e ->
+                        Mono.just(ResponseEntity.badRequest().body(Map.of("error", e.getMessage()))));
     }
-
 
     @GetMapping
     @Operation(summary = "Get all player rankings", description = "Retrieve rankings of players based on their wins.")
@@ -107,3 +105,4 @@ public class GameController {
         return Mono.just(ResponseEntity.ok(gameService.getAllPlayerRankings()));
     }
 }
+

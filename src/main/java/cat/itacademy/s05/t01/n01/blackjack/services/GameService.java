@@ -14,13 +14,11 @@ import reactor.core.publisher.Mono;
 import cat.itacademy.s05.t01.n01.blackjack.repository.GameRepository;
 import cat.itacademy.s05.t01.n01.blackjack.repository.PlayerRepository;
 
+import java.util.Comparator;
+
 @Service
 public class GameService {
     private Deck deck;
-
-    public GameService() {
-        this.deck = new Deck();
-    }
 
     @Autowired
     private GameRepository gameRepository;
@@ -28,19 +26,22 @@ public class GameService {
     @Autowired
     private PlayerRepository playerRepository;
 
+    public GameService() {
+        this.deck = new Deck();
+    }
+
     public Mono<Game> createGame(String playerId) {
         if (playerId == null || playerId.isEmpty()) {
             return Mono.error(new IllegalArgumentException("Player ID can't be null or empty"));
         }
 
-        return playerRepository.findById(playerId)  // Find existing player by ID
+        return playerRepository.findById(playerId)
                 .switchIfEmpty(Mono.error(new PlayerNotFoundException("Player with ID " + playerId + " not found")))
                 .flatMap(savedPlayer -> {
-                    Game game = new Game(savedPlayer); // Use existing player to create the game
+                    Game game = new Game(savedPlayer);
                     return gameRepository.save(game);
                 });
     }
-
 
     public Mono<Game> getGameDetails(String id) {
         return gameRepository.findById(id)
@@ -61,14 +62,16 @@ public class GameService {
                         }
                     } else if ("stand".equalsIgnoreCase(moveType)) {
                         game.playerStopsDrawing();
-
                         int playerScore = game.getPlayerCardsValue();
                         int dealerScore = game.getDealer().getCardsValue();
 
-                        if (dealerScore > 21 || playerScore > dealerScore) {
+                        // Determine the result
+                        if (playerScore > 21) {
+                            game.setResult("Player loses!");
+                        } else if (dealerScore > 21 || playerScore > dealerScore) {
                             game.setResult("Player wins!");
                             game.getPlayer().setWins(game.getPlayer().getWins() + 1);
-                        } else if (playerScore < dealerScore || playerScore > 21) {
+                        } else if (playerScore < dealerScore) {
                             game.setResult("Dealer wins!");
                         } else {
                             game.setResult("It's a tie!");
@@ -78,17 +81,14 @@ public class GameService {
                     }
 
                     return playerRepository.save(game.getPlayer())
-                            .then(gameRepository.save(game)); // Save game state with updated dealer cards
+                            .then(gameRepository.save(game)); // Save game state
                 });
     }
-
-
 
     public Flux<Ranking> getAllPlayerRankings() {
         return playerRepository.findAll()
                 .map(player -> new Ranking(player.getUsername(), player.getWins()))
-                .sort((ranking1, ranking2) -> Integer.compare(ranking2.getWins(), ranking1.getWins())); // Sort by wins descending
+                .sort(Comparator.comparingInt(Ranking::getWins).reversed()); // Sort by wins descending
     }
-
 }
 

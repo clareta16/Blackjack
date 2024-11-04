@@ -2,6 +2,7 @@ package controllers;
 
 import cat.itacademy.s05.t01.n01.blackjack.controllers.GameController;
 import cat.itacademy.s05.t01.n01.blackjack.exception.GameNotFoundException;
+import cat.itacademy.s05.t01.n01.blackjack.exception.PlayerNotFoundException;
 import cat.itacademy.s05.t01.n01.blackjack.model.Game;
 import cat.itacademy.s05.t01.n01.blackjack.model.Player;
 import cat.itacademy.s05.t01.n01.blackjack.model.Ranking;
@@ -21,6 +22,8 @@ import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.CREATED;
 
@@ -39,24 +42,34 @@ import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class GameControllerTest {
 
     @Mock
     private GameService gameService;
-    @Mock
-    private PlayerRepository playerRepository;
-
-
-    @Mock
-    private GameRepository gameRepository;
 
     @InjectMocks
     private GameController gameController;
 
     @BeforeEach
     void setUp() {
+        // No initialization required as Mockito handles this.
     }
 
     @Test
@@ -64,10 +77,10 @@ class GameControllerTest {
         // Arrange
         String playerId = "invalidId";
 
-        when(playerRepository.findById(playerId)).thenReturn(Mono.empty());
+        when(gameService.createGame(playerId)).thenReturn(Mono.error(new PlayerNotFoundException("Player not found")));
 
         // Act
-        Mono<ResponseEntity<Game>> response = gameController.createGame(playerId);
+        Mono<ResponseEntity<Map<String, Object>>> response = gameController.createGame(playerId);
 
         // Assert
         StepVerifier.create(response)
@@ -77,52 +90,50 @@ class GameControllerTest {
                 })
                 .verifyComplete();
 
-        verify(playerRepository, times(1)).findById(playerId);
+        verify(gameService, times(1)).createGame(playerId);
     }
 
     @Test
     void testCreateGame_Success() {
         // Arrange
         String playerId = "existingId";
-        Player existingPlayer = new Player("TestPlayer");
-        existingPlayer.setId(playerId);
+        Player existingPlayer = new Player(playerId, "TestPlayer", 0);
         Game createdGame = new Game(existingPlayer);
 
-        when(playerRepository.findById(playerId)).thenReturn(Mono.just(existingPlayer));
-        when(gameRepository.save(any(Game.class))).thenReturn(Mono.just(createdGame));
+        when(gameService.createGame(playerId)).thenReturn(Mono.just(createdGame));
 
         // Act
-        Mono<ResponseEntity<Game>> response = gameController.createGame(playerId);
+        Mono<ResponseEntity<Map<String, Object>>> response = gameController.createGame(playerId);
 
         // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> {
                     assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-                    assertEquals(createdGame, responseEntity.getBody());
+                    assertEquals(createdGame.getId(), responseEntity.getBody().get("gameId"));
                     return true;
                 })
                 .verifyComplete();
 
-        verify(playerRepository, times(1)).findById(playerId);
-        verify(gameRepository, times(1)).save(any(Game.class));
+        verify(gameService, times(1)).createGame(playerId);
     }
-
 
     @Test
     void testGetGameDetails_Success() {
+        // Arrange
         String gameId = "1";
-        String playerName = "TestPlayer";
-        Game game = new Game(new Player(playerName));
+        Game game = new Game(new Player("TestPlayer"));
         game.setId(gameId);
 
         when(gameService.getGameDetails(gameId)).thenReturn(Mono.just(game));
 
-        Mono<ResponseEntity<Game>> response = gameController.getGameDetails(gameId);
+        // Act
+        Mono<ResponseEntity<Map<String, Object>>> response = gameController.getGameDetails(gameId);
 
+        // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> {
                     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-                    assertEquals(gameId, responseEntity.getBody().getId());
+                    assertEquals(gameId, responseEntity.getBody().get("gameId"));
                     return true;
                 })
                 .verifyComplete();
@@ -132,12 +143,15 @@ class GameControllerTest {
 
     @Test
     void testGetGameDetails_NotFound() {
+        // Arrange
         String gameId = "1";
 
         when(gameService.getGameDetails(gameId)).thenReturn(Mono.empty());
 
-        Mono<ResponseEntity<Game>> response = gameController.getGameDetails(gameId);
+        // Act
+        Mono<ResponseEntity<Map<String, Object>>> response = gameController.getGameDetails(gameId);
 
+        // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> HttpStatus.NOT_FOUND.equals(responseEntity.getStatusCode()))
                 .verifyComplete();
@@ -150,27 +164,43 @@ class GameControllerTest {
         // Arrange
         String gameId = "1";
         String moveType = "hit";
-
-        String playerName = "TestPlayer";
-        Game game = new Game(new Player(playerName));
+        Game game = new Game(new Player("TestPlayer"));
         game.setId(gameId);
+        game.setResult("Player wins!");
 
-        // Mock the service to return the game when playGame is called
         when(gameService.playGame(gameId, moveType)).thenReturn(Mono.just(game));
 
         // Act
-        Mono<ResponseEntity<Game>> response = gameController.playGame(gameId, moveType);
+        Mono<ResponseEntity<Map<String, Object>>> response = gameController.playGame(gameId, moveType);
 
         // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> {
-                    assertEquals(HttpStatus.OK, responseEntity.getStatusCode()); // Check status code
-                    assertEquals(gameId, responseEntity.getBody().getId()); // Check game ID
+                    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+                    assertEquals(gameId, responseEntity.getBody().get("gameId"));
                     return true;
                 })
                 .verifyComplete();
 
-        // Verify that the service was called once
+        verify(gameService, times(1)).playGame(gameId, moveType);
+    }
+
+    @Test
+    void testPlayGame_NotFound() {
+        // Arrange
+        String gameId = "invalidId";
+        String moveType = "hit";
+
+        when(gameService.playGame(gameId, moveType)).thenReturn(Mono.error(new GameNotFoundException("Game not found")));
+
+        // Act
+        Mono<ResponseEntity<Map<String, Object>>> response = gameController.playGame(gameId, moveType);
+
+        // Assert
+        StepVerifier.create(response)
+                .expectNextMatches(responseEntity -> HttpStatus.NOT_FOUND.equals(responseEntity.getStatusCode()))
+                .verifyComplete();
+
         verify(gameService, times(1)).playGame(gameId, moveType);
     }
 
@@ -179,9 +209,8 @@ class GameControllerTest {
         // Arrange
         Ranking ranking1 = new Ranking("Player1", 5);
         Ranking ranking2 = new Ranking("Player2", 3);
-        Flux<Ranking> rankings = Flux.just(ranking1, ranking2);  // Create a Flux of rankings
+        Flux<Ranking> rankings = Flux.just(ranking1, ranking2);
 
-        // Mock the service to return the list of rankings
         when(gameService.getAllPlayerRankings()).thenReturn(rankings);
 
         // Act
@@ -190,24 +219,23 @@ class GameControllerTest {
         // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> {
-                    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());  // Check status code
-                    assertNotNull(responseEntity.getBody());  // Ensure body is not null
+                    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+                    assertNotNull(responseEntity.getBody());
 
                     // Verify that the response body is a Flux and contains the expected rankings
                     StepVerifier.create(responseEntity.getBody())
-                            .expectNext(ranking1)  // Check first ranking
-                            .expectNext(ranking2)  // Check second ranking
+                            .expectNext(ranking1)
+                            .expectNext(ranking2)
                             .verifyComplete();
 
-                    return true; // Ensure the test completes successfully
+                    return true;
                 })
-                .verifyComplete();  // Complete the verification
+                .verifyComplete();
 
-        // Verify that the service was called once
         verify(gameService, times(1)).getAllPlayerRankings();
     }
-
 }
+
 
 
 
