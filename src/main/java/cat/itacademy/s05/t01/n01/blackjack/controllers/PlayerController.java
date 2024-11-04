@@ -19,7 +19,7 @@ public class PlayerController {
     private PlayerService playerService;
 
     @PutMapping("/{playerId}")
-    @Operation(summary = "Change player's username", description = "Change the username of a specific player.")
+    @Operation(summary = "Change player's username", description = "Change the username of a player based on his/her id")
     @ApiResponse(responseCode = "200", description = "Username updated successfully")
     @ApiResponse(responseCode = "404", description = "Player not found")
     @ApiResponse(responseCode = "400", description = "Invalid username")

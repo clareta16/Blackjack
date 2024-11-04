@@ -49,14 +49,6 @@ public class Player {
         this.isPlaying = isPlaying;
     }
 
-    public void addCard(Card card) {
-        if (card != null) {
-            this.totalCardsValue += card.getValue();
-        } else {
-            throw new IllegalArgumentException("Card cannot be null");
-        }
-    }
-
 }
 
 

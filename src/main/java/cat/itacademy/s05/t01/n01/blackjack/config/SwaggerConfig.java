@@ -1,7 +1,5 @@
 package cat.itacademy.s05.t01.n01.blackjack.config;
-//import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-//import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.servers.Server;
+
 import io.swagger.v3.oas.models.info.Info;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +19,7 @@ public class SwaggerConfig {
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("blackjack")
-                .pathsToMatch("/game/**", "/player/**", "/score/**")
+                .pathsToMatch("/game/**", "/player/**")
                 .build();
     }
 }

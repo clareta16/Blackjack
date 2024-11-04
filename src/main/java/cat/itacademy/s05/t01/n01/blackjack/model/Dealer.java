@@ -3,9 +3,6 @@ package cat.itacademy.s05.t01.n01.blackjack.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Dealer {
     private List<Card> cards = new ArrayList<>();
     private static final int STAND_THRESHOLD = 17;
@@ -46,7 +43,3 @@ public class Dealer {
         return cardsValue;
     }
 }
-
-
-
-

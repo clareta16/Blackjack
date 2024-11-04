@@ -20,7 +20,6 @@ public class Game {
     private boolean isActive;
     private String result;
 
-
     public Game(Player player) {
         this.player = player;
         this.deck = new Deck();
@@ -40,29 +39,21 @@ public class Game {
     public Player getPlayer() {
         return player;
     }
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
     public void setResult(String result) {
         this.result = result;
-    }
-    public Deck getDeck() {
-        return deck;
     }
     public Dealer getDealer() {
         return dealer;
     }
-
     public void setActive(boolean active) {
         isActive = active;
+    }
+    public String getResult() {
+        return result;
     }
 
     public boolean isActive() {
         return isActive;
-    }
-
-    public String getResult() {
-        return result;
     }
 
     public void startGame() {
@@ -77,9 +68,10 @@ public class Game {
         playerCards.add(deck.draw());
         playerCards.add(deck.draw());
         dealer.playTurn(deck);
+        dealer.playTurn(deck);
+
 
     }
-
 
     public void dealCardToPlayer() {
         if (deck.isEmpty()) {
@@ -87,12 +79,10 @@ public class Game {
         }
         Card drawnCard = deck.draw();
         playerCards.add(drawnCard);
-        player.addCard(drawnCard);
     }
 
     public void playerStopsDrawing() {
         player.setPlaying(false);
-        dealer.playTurn(deck);
         dealer.playTurn(deck);
     }
 
@@ -110,10 +100,6 @@ public class Game {
             acesCount--;
         }
         return totalValue;
-    }
-
-    public int getDealerCardsValue() {
-        return dealer.getCardsValue();
     }
 
     public String getPlayerCardsAsString() {

@@ -65,7 +65,6 @@ public class GameService {
                         int playerScore = game.getPlayerCardsValue();
                         int dealerScore = game.getDealer().getCardsValue();
 
-                        // Determine the result
                         if (playerScore > 21) {
                             game.setResult("Player loses!");
                         } else if (dealerScore > 21 || playerScore > dealerScore) {
@@ -81,14 +80,14 @@ public class GameService {
                     }
 
                     return playerRepository.save(game.getPlayer())
-                            .then(gameRepository.save(game)); // Save game state
+                            .then(gameRepository.save(game));
                 });
     }
 
     public Flux<Ranking> getAllPlayerRankings() {
         return playerRepository.findAll()
                 .map(player -> new Ranking(player.getUsername(), player.getWins()))
-                .sort(Comparator.comparingInt(Ranking::getWins).reversed()); // Sort by wins descending
+                .sort(Comparator.comparingInt(Ranking::getWins).reversed());
     }
 }
 

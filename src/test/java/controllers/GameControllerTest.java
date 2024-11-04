@@ -69,20 +69,16 @@ class GameControllerTest {
 
     @BeforeEach
     void setUp() {
-        // No initialization required as Mockito handles this.
     }
 
     @Test
     void testCreateGame_PlayerNotFound() {
-        // Arrange
-        String playerId = "invalidId";
+        String playerId = "notExistingId";
 
         when(gameService.createGame(playerId)).thenReturn(Mono.error(new PlayerNotFoundException("Player not found")));
 
-        // Act
         Mono<ResponseEntity<Map<String, Object>>> response = gameController.createGame(playerId);
 
-        // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> {
                     assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
@@ -95,17 +91,13 @@ class GameControllerTest {
 
     @Test
     void testCreateGame_Success() {
-        // Arrange
         String playerId = "existingId";
-        Player existingPlayer = new Player(playerId, "TestPlayer", 0);
+        Player existingPlayer = new Player("TestPlayer");
         Game createdGame = new Game(existingPlayer);
 
         when(gameService.createGame(playerId)).thenReturn(Mono.just(createdGame));
-
-        // Act
         Mono<ResponseEntity<Map<String, Object>>> response = gameController.createGame(playerId);
 
-        // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> {
                     assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
@@ -119,17 +111,13 @@ class GameControllerTest {
 
     @Test
     void testGetGameDetails_Success() {
-        // Arrange
         String gameId = "1";
         Game game = new Game(new Player("TestPlayer"));
         game.setId(gameId);
 
         when(gameService.getGameDetails(gameId)).thenReturn(Mono.just(game));
-
-        // Act
         Mono<ResponseEntity<Map<String, Object>>> response = gameController.getGameDetails(gameId);
 
-        // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> {
                     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -143,15 +131,11 @@ class GameControllerTest {
 
     @Test
     void testGetGameDetails_NotFound() {
-        // Arrange
         String gameId = "1";
 
         when(gameService.getGameDetails(gameId)).thenReturn(Mono.empty());
-
-        // Act
         Mono<ResponseEntity<Map<String, Object>>> response = gameController.getGameDetails(gameId);
 
-        // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> HttpStatus.NOT_FOUND.equals(responseEntity.getStatusCode()))
                 .verifyComplete();
@@ -161,7 +145,6 @@ class GameControllerTest {
 
     @Test
     void testPlayGame_Success() {
-        // Arrange
         String gameId = "1";
         String moveType = "hit";
         Game game = new Game(new Player("TestPlayer"));
@@ -170,10 +153,8 @@ class GameControllerTest {
 
         when(gameService.playGame(gameId, moveType)).thenReturn(Mono.just(game));
 
-        // Act
         Mono<ResponseEntity<Map<String, Object>>> response = gameController.playGame(gameId, moveType);
 
-        // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> {
                     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -187,16 +168,14 @@ class GameControllerTest {
 
     @Test
     void testPlayGame_NotFound() {
-        // Arrange
         String gameId = "invalidId";
         String moveType = "hit";
 
         when(gameService.playGame(gameId, moveType)).thenReturn(Mono.error(new GameNotFoundException("Game not found")));
 
-        // Act
+
         Mono<ResponseEntity<Map<String, Object>>> response = gameController.playGame(gameId, moveType);
 
-        // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> HttpStatus.NOT_FOUND.equals(responseEntity.getStatusCode()))
                 .verifyComplete();
@@ -206,23 +185,19 @@ class GameControllerTest {
 
     @Test
     void testGetAllRanking_Success() {
-        // Arrange
         Ranking ranking1 = new Ranking("Player1", 5);
         Ranking ranking2 = new Ranking("Player2", 3);
         Flux<Ranking> rankings = Flux.just(ranking1, ranking2);
 
         when(gameService.getAllPlayerRankings()).thenReturn(rankings);
 
-        // Act
         Mono<ResponseEntity<Flux<Ranking>>> response = gameController.getAllRanking();
 
-        // Assert
         StepVerifier.create(response)
                 .expectNextMatches(responseEntity -> {
                     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
                     assertNotNull(responseEntity.getBody());
 
-                    // Verify that the response body is a Flux and contains the expected rankings
                     StepVerifier.create(responseEntity.getBody())
                             .expectNext(ranking1)
                             .expectNext(ranking2)
@@ -235,13 +210,5 @@ class GameControllerTest {
         verify(gameService, times(1)).getAllPlayerRankings();
     }
 }
-
-
-
-
-
-
-
-
 
 

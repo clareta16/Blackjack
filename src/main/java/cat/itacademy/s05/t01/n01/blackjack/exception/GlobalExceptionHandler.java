@@ -16,10 +16,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GameNotFoundException.class)
     public ResponseEntity<String> handleGameNotFoundException(GameNotFoundException ex) {
-        return new ResponseEntity<>("Error " + ex.getMessage(), HttpStatus.NOT_FOUND); //404
+        return new ResponseEntity<>("Error " + ex.getMessage(), HttpStatus.NOT_FOUND);
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGlobalException(Exception ex) {
-        return new ResponseEntity<>("There has been an unexpected error " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR); //500
+        return new ResponseEntity<>("There has been an unexpected error " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
